@@ -123,6 +123,9 @@ void Bar(char *arg)
 }
 int CreateThread(pthread_t *tid,char **argv,CopyInfo **pCopy)
 {
+	tid = (pthread_t*)malloc(sizeof(pthread_t)*ThreadNum);
+	//信息结构体
+	pCopy = (CopyInfo**)malloc(sizeof(CopyInfo*)*ThreadNum);
 	int err;
 	for(int i = 0;i < ThreadNum;i++)
 	{
@@ -162,7 +165,6 @@ void Thread_join(pthread_t *tid,int err)
 
 int main(int argc,char **argv)
 {
-/*-------------------参数校验-------------------------------------------*/
 	if(argc < 3)
 	{
 		printf("argument defect\n");
@@ -180,7 +182,6 @@ int main(int argc,char **argv)
 			exit(0);
 		}
 	}
-/*-------------------------------------------------------------------------*/
 	//计算文件大小
 	int fd = open(argv[1],O_RDONLY);
 	if(fd == -1)
@@ -190,10 +191,8 @@ int main(int argc,char **argv)
 	fileSize = lseek(fd,0,SEEK_END);
 	//记录每个线程的tid
 	pthread_t *tid = NULL;
-	tid = (pthread_t*)malloc(sizeof(pthread_t)*ThreadNum);
 	//创建线程
-	//信息结构体
-	CopyInfo **pCopy = (CopyInfo**)malloc(sizeof(CopyInfo*)*ThreadNum);
+	CopyInfo **pCopy = NULL;
 	int err = CreateThread(tid,argv,pCopy);
 	//打印进度条
 	Bar(argv[2]);

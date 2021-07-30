@@ -121,8 +121,34 @@ void Bar(char *arg)
 		usleep(100000);
 	}
 }
-int CreateThread(pthread_t *tid,char **argv,CopyInfo **pCopy)
+int main(int argc,char **argv)
 {
+	if(argc < 3)
+	{
+		printf("argument defect\n");
+		exit(0);
+	}
+
+
+	//检测、更新传入线程数
+	if(argc == 4)
+	{
+		ThreadNum = atoi(argv[3]);
+		if(ThreadNum <=0 || ThreadNum > 100)
+		{
+			printf("ThreadNum Input Error:1~100\n");
+			exit(0);
+		}
+	}
+	//打开共享文件
+	int fd = open(argv[1],O_RDONLY);
+	//计算文件大小
+	fileSize = lseek(fd,0,SEEK_END);
+	//记录每个线程的tid
+	pthread_t *tid = NULL;
+	tid = (pthread_t*)malloc(sizeof(pthread_t)*ThreadNum);
+	//信息结构体
+	CopyInfo **pCopy = (CopyInfo**)malloc(sizeof(CopyInfo*)*ThreadNum);
 	int err;
 	for(int i = 0;i < ThreadNum;i++)
 	{
@@ -141,11 +167,8 @@ int CreateThread(pthread_t *tid,char **argv,CopyInfo **pCopy)
 			exit(0);
 		}
 	}
-
-	return err;
-}
-void Thread_join(pthread_t *tid,int err)
-{
+	//打印进度条
+	Bar(argv[2]);
 	//回收线程
 	for(int i = 0;i < ThreadNum;i++)
 	{
@@ -158,47 +181,6 @@ void Thread_join(pthread_t *tid,int err)
 			printf("pthread [%x] join sucess\n",(unsigned int)tid[i]);
 		}
 	}
-}
-
-int main(int argc,char **argv)
-{
-/*-------------------参数校验-------------------------------------------*/
-	if(argc < 3)
-	{
-		printf("argument defect\n");
-		exit(0);
-	}
-
-
-	//检测、更新传入线程数
-	if(argc == 4)
-	{
-		ThreadNum = atoi(argv[3]);
-		if(ThreadNum <=0 || ThreadNum > 100)
-		{
-			printf("ThreadNum Input Error:1~100\n");
-			exit(0);
-		}
-	}
-/*-------------------------------------------------------------------------*/
-	//计算文件大小
-	int fd = open(argv[1],O_RDONLY);
-	if(fd == -1)
-	{
-		perror("call open src_file error");
-	}
-	fileSize = lseek(fd,0,SEEK_END);
-	//记录每个线程的tid
-	pthread_t *tid = NULL;
-	tid = (pthread_t*)malloc(sizeof(pthread_t)*ThreadNum);
-	//创建线程
-	//信息结构体
-	CopyInfo **pCopy = (CopyInfo**)malloc(sizeof(CopyInfo*)*ThreadNum);
-	int err = CreateThread(tid,argv,pCopy);
-	//打印进度条
-	Bar(argv[2]);
-	//回收线程
-	Thread_join(tid,err); 
 	//-------------------------------释放内存-----------------------------
 	free(tid);
 	tid = NULL;

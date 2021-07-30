@@ -162,7 +162,6 @@ void Thread_join(pthread_t *tid,int err)
 
 int main(int argc,char **argv)
 {
-/*-------------------参数校验-------------------------------------------*/
 	if(argc < 3)
 	{
 		printf("argument defect\n");
@@ -180,7 +179,6 @@ int main(int argc,char **argv)
 			exit(0);
 		}
 	}
-/*-------------------------------------------------------------------------*/
 	//计算文件大小
 	int fd = open(argv[1],O_RDONLY);
 	if(fd == -1)
